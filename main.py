@@ -105,7 +105,7 @@ def login_confirm_session():
         ses = Session(user_id, login_session_token)
     db.session.add(ses)
     db.session.commit()
-    config = UserConfig.session.get(user_id)
+    config = UserConfig.query.get(user_id)
 
     widgets = []
     if config.twitter_w > 0:
