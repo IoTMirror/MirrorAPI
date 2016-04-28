@@ -15,6 +15,7 @@ app.debug = True
 db = SQLAlchemy(app)
 
 twitter_url = os.environ["TWITTER_URL"]
+google_url = os.environ["GOOGLE_URL"]
 
 
 class IdUserBinding(db.Model):
@@ -195,13 +196,28 @@ def twitter(user_id):
     if resp.status_code == 200:
         return resp.content
     else:
-        return jsonify({"error": "User not logged into twitter"})
+        return jsonify({"error": resp.content}), resp.status_code
+
+
+@app.route("/tasks", methods=['GET'])
+def task_list(user_id):
+    url = "{0}users/{1}/tasks".format(google_url, user_id)
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        return resp.content
+    else:
+        return jsonify({"error": resp.content}), resp.status_code
 
 
 @app.route("/gmail", methods=['GET'])
 @requires_login_get
 def gmail(user_id):
-    return '{"data": "placeholder"}'
+    url = "{0}users/{1}/emails/inbox".format(google_url, user_id)
+    resp = requests.get(url)
+    if resp.status_code == 200:
+        return resp.content
+    else:
+        return jsonify({"error": resp.content}), resp.status_code
 
 
 if __name__ == "__main__":
