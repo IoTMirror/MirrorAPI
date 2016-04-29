@@ -46,10 +46,15 @@ class UserConfig(db.Model):
     twitter_w = db.Column(db.Integer)
     twitter_h = db.Column(db.Integer)
 
-    photo_x = db.Column(db.Integer)
-    photo_y = db.Column(db.Integer)
-    photo_w = db.Column(db.Integer)
-    photo_h = db.Column(db.Integer)
+    gmail_x = db.Column(db.Integer)
+    gmail_y = db.Column(db.Integer)
+    gmail_w = db.Column(db.Integer)
+    gmail_h = db.Column(db.Integer)
+
+    tasks_x = db.Column(db.Integer)
+    tasks_y = db.Column(db.Integer)
+    tasks_w = db.Column(db.Integer)
+    tasks_h = db.Column(db.Integer)
 
 
 def load_session(token):
@@ -121,17 +126,30 @@ def login_confirm_session():
                 "Y": config.twitter_h
             }
         })
-    if config.photo_w > 0:
+    if config.gmail_w > 0:
         widgets.append({
-            "WidgetName": "Photo",
+            "WidgetName": "Gmail",
             "WidgetType": "Small",
             "WidgetPosition": {
-                "X": config.photo_x,
-                "Y": config.photo_y
+                "X": config.gmail_x,
+                "Y": config.gmail_y
             },
             "WidgetSize": {
-                "X": config.photo_w,
-                "Y": config.photo_h
+                "X": config.gmail_w,
+                "Y": config.gmail_h
+            }
+        })
+    if config.tasks_w > 0:
+        widgets.append({
+            "WidgetName": "Tasks",
+            "WidgetType": "Small",
+            "WidgetPosition": {
+                "X": config.tasks_x,
+                "Y": config.tasks_y
+            },
+            "WidgetSize": {
+                "X": config.tasks_w,
+                "Y": config.tasks_h
             }
         })
     return jsonify({'Token': login_session_token, 'Widgets': widgets})
