@@ -218,6 +218,7 @@ def twitter(user_id):
 
 
 @app.route("/tasks", methods=['GET'])
+@requires_login_get
 def task_list(user_id):
     url = "{0}users/{1}/tasks".format(google_url, user_id)
     resp = requests.get(url)
