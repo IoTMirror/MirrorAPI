@@ -58,6 +58,36 @@ class UserConfig(db.Model):
     tasks_h = db.Column(db.Integer)
 
 
+def twitter_logged_in(user_id):
+    url = "{}users/{}".format(twitter_url, user_id)
+    resp = requests.get(url, headers=request_headers)
+    print(url)
+    print(resp.status_code)
+    if resp.status_code is 200:
+        print(resp.text)
+        return {
+            "logged_in": True,
+            "name": resp.json()["screen_name"]
+        }
+    else:
+        return {
+            "logged_in": False
+        }
+
+
+def google_logged_in(user_id):
+    resp = requests.get("{}users/{}".format(google_url, user_id), headers=request_headers)
+    if resp.status_code is 200:
+        return {
+            "logged_in": True,
+            "name": resp.json()["name"]
+        }
+    else:
+        return {
+            "logged_in": False
+        }
+
+
 def load_session(token):
     return Session.query.filter_by(token=token).first()
 
@@ -114,7 +144,8 @@ def login_confirm_session():
     config = UserConfig.query.get(user_id)
 
     widgets = []
-    if config.twitter_w > 0:
+    google_actove = google_logged_in(user_id)
+    if config.twitter_w > 0 and twitter_logged_in(user_id):
         widgets.append({
             "WidgetName": "Twitter",
             "WidgetType": "Small",
@@ -127,7 +158,7 @@ def login_confirm_session():
                 "Y": config.twitter_h
             }
         })
-    if config.gmail_w > 0:
+    if config.gmail_w > 0 and google_active:
         widgets.append({
             "WidgetName": "Gmail",
             "WidgetType": "Small",
@@ -140,7 +171,7 @@ def login_confirm_session():
                 "Y": config.gmail_h
             }
         })
-    if config.tasks_w > 0:
+    if config.tasks_w > 0 and google_active:
         widgets.append({
             "WidgetName": "Tasks",
             "WidgetType": "Small",
@@ -223,7 +254,7 @@ def twitter(user_id):
 def task_list(user_id):
     url = "{0}users/{1}/tasks".format(google_url, user_id)
     resp = requests.get(url, headers=request_headers)
-    if resp.status_code == 200:
+    if False and resp.status_code == 200:
         return resp.content
     else:
         return jsonify({"error": resp.content}), resp.status_code
