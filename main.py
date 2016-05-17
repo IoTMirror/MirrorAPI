@@ -124,7 +124,7 @@ def login_confirm_session():
     config = UserConfig.query.get(user_id)
 
     widgets = []
-    google_actove = google_logged_in(user_id)
+    google_active = google_logged_in(user_id)
     if config.twitter_w > 0 and twitter_logged_in(user_id):
         widgets.append({
             "WidgetName": "Twitter",
