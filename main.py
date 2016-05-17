@@ -13,6 +13,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
 app.debug = True
 db = SQLAlchemy(app)
+request_headers = {"Authorization": os.environ["AUTH"]}
 
 twitter_url = os.environ["TWITTER_URL"]
 google_url = os.environ["GOOGLE_URL"]
@@ -210,7 +211,7 @@ def facebook(user_id):
 @requires_login_get
 def twitter(user_id):
     url = "{0}users/{1}/home_timeline".format(twitter_url, user_id)
-    resp = requests.get(url)
+    resp = requests.get(url, headers=request_headers)
     if resp.status_code == 200:
         return resp.content
     else:
@@ -221,7 +222,7 @@ def twitter(user_id):
 @requires_login_get
 def task_list(user_id):
     url = "{0}users/{1}/tasks".format(google_url, user_id)
-    resp = requests.get(url)
+    resp = requests.get(url, headers=request_headers)
     if resp.status_code == 200:
         return resp.content
     else:
@@ -232,7 +233,7 @@ def task_list(user_id):
 @requires_login_get
 def gmail(user_id):
     url = "{0}users/{1}/emails/inbox".format(google_url, user_id)
-    resp = requests.get(url)
+    resp = requests.get(url, headers=request_headers)
     if resp.status_code == 200:
         return resp.content
     else:
