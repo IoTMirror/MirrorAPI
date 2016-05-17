@@ -61,32 +61,12 @@ class UserConfig(db.Model):
 def twitter_logged_in(user_id):
     url = "{}users/{}".format(twitter_url, user_id)
     resp = requests.get(url, headers=request_headers)
-    print(url)
-    print(resp.status_code)
-    if resp.status_code is 200:
-        print(resp.text)
-        return {
-            "logged_in": True,
-            "name": resp.json()["screen_name"]
-        }
-    else:
-        return {
-            "logged_in": False
-        }
+    return resp.status_code is 200
 
 
 def google_logged_in(user_id):
     resp = requests.get("{}users/{}".format(google_url, user_id), headers=request_headers)
-    if resp.status_code is 200:
-        return {
-            "logged_in": True,
-            "name": resp.json()["name"]
-        }
-    else:
-        return {
-            "logged_in": False
-        }
-
+    return resp.status_code is 200
 
 def load_session(token):
     return Session.query.filter_by(token=token).first()
