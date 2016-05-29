@@ -17,6 +17,7 @@ request_headers = {"Authorization": os.environ["AUTH"]}
 
 twitter_url = os.environ["TWITTER_URL"]
 google_url = os.environ["GOOGLE_URL"]
+ad_keyword_filter_url = os.environ["AD_URL"]
 
 
 class IdUserBinding(db.Model):
@@ -249,6 +250,14 @@ def gmail(user_id):
         return resp.content
     else:
         return jsonify({"error": resp.content}), resp.status_code
+
+
+@app.route("/ad_keywords", methods=['GET'])
+@requires_login_get
+def keywords(user_id):
+    url="{0}keywords/{1}".format(ad_keyword_filter_url, user_id)
+    resp = requests.get(url)
+    return resp.content
 
 
 if __name__ == "__main__":
