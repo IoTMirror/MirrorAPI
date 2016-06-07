@@ -18,7 +18,7 @@ request_headers = {"Authorization": os.environ["AUTH"]}
 twitter_url = os.environ["TWITTER_URL"]
 google_url = os.environ["GOOGLE_URL"]
 ad_keyword_filter_url = os.environ["AD_URL"]
-
+recognition_service_url = os.environ["RECOGNITION_SERVICE_URL"]
 
 class IdUserBinding(db.Model):
     __tablename__ = 'device_user'
@@ -72,18 +72,13 @@ def google_logged_in(user_id):
 def load_session(token):
     return Session.query.filter_by(token=token).first()
 
-
-def send_new_session_notification(device_id):
-    request_body = jsonify({"mirrorID": device_id})
-    return 12345
-
-
-def confirm_face_recognition(token, recognition_token):
-    request_body = jsonify({'token': token, 'recognition_token': recognition_token})
-    return 1
-
-
-recognition_service_url = "http://localhost"
+def confirm_face_recognition(recognition_token):
+    url = "{}private/RecognitionSessions/{}".format(recognition_service_url, recognition_token)
+    resp = requests.get(url, headers=request_headers)
+    if resp.status_code is 200:
+      return resp.json()["recognizedUser"]
+    else:
+      return -2
 
 
 @app.route("/login/start_session", methods=['POST'])
@@ -93,25 +88,27 @@ def login_start_session():
         return jsonify({'error': 'DeviceId missing'}), 401
 
     device_id = body['DeviceId']
-    users_bound = [e.user_id for e in IdUserBinding.query.filter_by(device_id=device_id)]
-    session_token = send_new_session_notification(device_id)
-
-    return jsonify({'LoginToken': session_token}), 200
+    url = "{}private/RecognitionSessions/{}".format(recognition_service_url, device_id)
+    resp = requests.post(url, headers=request_headers)
+    
+    if resp.status_code is 201:
+      return jsonify({'RecognitionToken': resp.json()["sessionID"]}), 200
+    else:
+      return jsonify({'error': 'Cannot start login session'}), 500
 
 
 @app.route("/login/confirm", methods=['POST'])
 def login_confirm_session():
     body = request.get_json()
-    if 'LoginToken' not in body:
-        return jsonify({'error': 'Token missing'}), 401
     if 'RecognitionToken' not in body:
         return jsonify({'error': 'RecognitionToken missing'}), 401
 
-    token = body['LoginToken']
     recognition_token = body['RecognitionToken']
 
-    user_id = confirm_face_recognition(token, recognition_token)
+    user_id = confirm_face_recognition(recognition_token)
     if user_id is -1:
+        return jsonify({'error': 'User not recognized'}), 401
+    if user_id is -2:
         return jsonify({'error': 'Invalid token'}), 401
 
     login_session_token = uuid.uuid4().hex
